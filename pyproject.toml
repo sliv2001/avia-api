@@ -1,0 +1,17 @@
+[project]
+name = "avia-api"
+version = "0.1.0"
+description = "Python API for aviasales.ru"
+authors = [
+    {name = "Ivan Sladkov",email = "ivan.sladkov@yandex.ru"}
+]
+requires-python = ">=3.11"
+dependencies = [
+]
+
+[tool.poetry]
+packages = [{include = "avia_api", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
