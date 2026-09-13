@@ -35,3 +35,9 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["src/avia_api"]
+
+[tool.coverage.report]
+fail_under = 99
+exclude_also = [
+    "if t\\.TYPE_CHECKING:",
+]
