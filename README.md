@@ -92,7 +92,7 @@ client = AviaApiClient(
 ```
 
 - **Rate limiting** - [pyrate-limiter](https://github.com/vutran1710/PyrateLimiter), единый bucket на клиент. Ограничивает скорость исходящих запросов ещё до отправки, чтобы не словить `429` от API.
-- **Retries** - [tenacity](https://github.com/jd/tenacity) с экспоненциальным backoff и джиттером; при `429` учитывается заголовок `Retry-After`, если он присутствует.
+- **Retries** - [tenacity](https://github.com/jd/tenacity) с экспоненциальным backoff и джиттером; при `429` учитывается заголовок `Retry-After`, если он присутствует, но не более 60 секунд за одну попытку - явно большое значение от сервера (например, во время инцидента на его стороне) не может подвесить запрос на произвольное время.
 - **Кэш** - [hishel](https://hishel.com) поверх sqlite. Ответы Travelpayouts не присылают `Cache-Control`, поэтому используется `FilterPolicy` (кэшируется любой успешный `GET`, а срок жизни записи определяется `cache_ttl`), а не RFC 9111.
 
 Для тестов или нестандартных сценариев можно передать `transport=...` - собственный `httpx.AsyncBaseTransport`, тогда rate limiting/retry/кэш полностью отключаются, и запросы идут напрямую через него (см. `respx` или `httpx.MockTransport`).

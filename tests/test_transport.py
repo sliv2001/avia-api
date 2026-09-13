@@ -10,7 +10,7 @@ import respx
 import tenacity
 from pyrate_limiter import Duration, Rate
 
-from avia_api._transport import _RetryableStatusError, _wait, build_transport
+from avia_api._transport import MAX_RETRY_AFTER_WAIT, _RetryableStatusError, _wait, build_transport
 
 LOGGER_NAME = "avia_api._transport"
 
@@ -136,6 +136,27 @@ async def test_max_retries_is_never_less_than_one(respx_mock: respx.MockRouter) 
     assert route.call_count == 1
 
 
+async def test_huge_retry_after_header_does_not_stall_beyond_the_cap(
+    respx_mock: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A real Retry-After this large would otherwise make the test (and any
+    # real caller) wait an hour; capping it is exactly the behavior under
+    # test, so shrink the cap instead of the header to keep this fast.
+    monkeypatch.setattr("avia_api._transport.MAX_RETRY_AFTER_WAIT", 0.05)
+    respx_mock.get("/data").mock(
+        side_effect=[httpx.Response(429, headers={"Retry-After": "3600"}), httpx.Response(200)]
+    )
+    transport = build_transport(rate=None, max_retries=2, cache_ttl=None, cache_path="unused.db")
+
+    async with _client(transport) as client:
+        start = time.monotonic()
+        response = await client.get("/data")
+        elapsed = time.monotonic() - start
+
+    assert response.status_code == 200
+    assert elapsed < 2.0
+
+
 # --- rate limiting -----------------------------------------------------------
 
 
@@ -180,6 +201,23 @@ def test_wait_falls_back_to_exponential_backoff_when_no_retry_after() -> None:
 def test_wait_falls_back_to_exponential_backoff_for_non_status_errors() -> None:
     state = _retry_state(httpx.ConnectError("boom"))
     assert _wait(state) >= 0.0
+
+
+def test_wait_caps_retry_after_to_maximum() -> None:
+    state = _retry_state(_RetryableStatusError(retry_after=3600.0))
+    assert _wait(state) == MAX_RETRY_AFTER_WAIT
+
+
+def test_wait_does_not_cap_retry_after_below_maximum() -> None:
+    state = _retry_state(_RetryableStatusError(retry_after=MAX_RETRY_AFTER_WAIT - 1))
+    assert _wait(state) == MAX_RETRY_AFTER_WAIT - 1
+
+
+def test_wait_logs_warning_when_capping_retry_after(caplog: pytest.LogCaptureFixture) -> None:
+    state = _retry_state(_RetryableStatusError(retry_after=3600.0))
+    with caplog.at_level(logging.WARNING, logger=LOGGER_NAME):
+        _wait(state)
+    assert "capping wait" in caplog.text.lower()
 
 
 # --- logging -------------------------------------------------------------

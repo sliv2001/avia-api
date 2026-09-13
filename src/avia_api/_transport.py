@@ -27,6 +27,14 @@ _EXPONENTIAL_WAIT = tenacity.wait_exponential_jitter(initial=0.5, max=8.0)
 #: this many seconds - avoids a debug line on every single request.
 _RATE_LIMIT_LOG_THRESHOLD = 0.01
 
+#: Upper bound for a single retry wait derived from a server-supplied
+#: ``Retry-After`` header. Without this, a large (or misconfigured) value -
+#: Travelpayouts documents nothing here, and some APIs send minutes during
+#: incidents - would stall a request for that long on every retried attempt,
+#: since ``stop_after_attempt`` only bounds the number of attempts, not how
+#: long each one is allowed to wait.
+MAX_RETRY_AFTER_WAIT = 60.0
+
 
 class _RetryableStatusError(Exception):
     """Internal signal: the response's status code should trigger a retry."""
@@ -39,7 +47,13 @@ class _RetryableStatusError(Exception):
 def _wait(retry_state: tenacity.RetryCallState) -> float:
     exc = retry_state.outcome.exception() if retry_state.outcome else None
     if isinstance(exc, _RetryableStatusError) and exc.retry_after is not None:
-        return exc.retry_after
+        if exc.retry_after > MAX_RETRY_AFTER_WAIT:
+            logger.warning(
+                "Server requested Retry-After=%.1fs; capping wait to %.1fs",
+                exc.retry_after,
+                MAX_RETRY_AFTER_WAIT,
+            )
+        return min(exc.retry_after, MAX_RETRY_AFTER_WAIT)
     return _EXPONENTIAL_WAIT(retry_state)
 
 
