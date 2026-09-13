@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -35,7 +35,7 @@ def test_parse_retry_after_garbage() -> None:
 
 
 def test_parse_retry_after_http_date_in_future() -> None:
-    target = datetime.now(timezone.utc) + timedelta(seconds=60)
+    target = datetime.now(UTC) + timedelta(seconds=60)
     header = target.strftime("%a, %d %b %Y %H:%M:%S GMT")
     result = parse_retry_after(header)
     assert result is not None
@@ -44,7 +44,7 @@ def test_parse_retry_after_http_date_in_future() -> None:
 
 
 def test_parse_retry_after_http_date_in_past_is_clamped_to_zero() -> None:
-    target = datetime.now(timezone.utc) - timedelta(seconds=60)
+    target = datetime.now(UTC) - timedelta(seconds=60)
     header = target.strftime("%a, %d %b %Y %H:%M:%S GMT")
     assert parse_retry_after(header) == 0.0
 

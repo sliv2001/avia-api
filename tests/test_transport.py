@@ -33,9 +33,7 @@ async def test_cache_disabled_hits_network_on_every_request(respx_mock: respx.Mo
     assert route.call_count == 2
 
 
-async def test_cache_enabled_serves_repeat_request_from_cache(
-    respx_mock: respx.MockRouter, tmp_path: Path
-) -> None:
+async def test_cache_enabled_serves_repeat_request_from_cache(respx_mock: respx.MockRouter, tmp_path: Path) -> None:
     route = respx_mock.get("/data").mock(return_value=httpx.Response(200, json={"ok": True}))
     transport = build_transport(rate=None, max_retries=3, cache_ttl=60.0, cache_path=tmp_path / "cache.db")
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 from unittest.mock import MagicMock
 
 import httpx
@@ -20,7 +20,6 @@ from avia_api import (
 from avia_api._client import TOKEN_ENV_VAR
 
 from .helpers import envelope, json_response
-
 
 # --- token / header handling -------------------------------------------------
 

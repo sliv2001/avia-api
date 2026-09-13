@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 import hishel
 import httpx
@@ -46,7 +45,7 @@ class _ResilientTransport(httpx.AsyncBaseTransport):
         self,
         transport: httpx.AsyncBaseTransport,
         *,
-        rate: Union[Rate, list[Rate]],
+        rate: Rate | list[Rate],
         max_retries: int,
     ) -> None:
         self._transport = transport
@@ -84,10 +83,10 @@ class _ResilientTransport(httpx.AsyncBaseTransport):
 
 def build_transport(
     *,
-    rate: Union[Rate, list[Rate], None],
+    rate: Rate | list[Rate] | None,
     max_retries: int,
     cache_ttl: float | None,
-    cache_path: Union[str, Path],
+    cache_path: str | Path,
 ) -> httpx.AsyncBaseTransport:
     """Build the layered transport: cache -> rate limit/retry -> network.
 

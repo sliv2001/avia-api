@@ -11,7 +11,7 @@ T = t.TypeVar("T")
 
 
 class BaseResource:
-    def __init__(self, client: "AviaApiClient") -> None:
+    def __init__(self, client: AviaApiClient) -> None:
         self._client = client
 
     async def _get(self, path: str, params: dict[str, t.Any], adapter: TypeAdapter[T]) -> T:

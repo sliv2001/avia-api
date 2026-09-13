@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 import httpx
-import pytest
 
 from avia_api import AviaApiClient
 from avia_api.models.reference import Airline, AirlineAlliance, Airport, City, Country, Plane, Route

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, TypeVar
 
 import httpx
 from pydantic import TypeAdapter, ValidationError
@@ -24,6 +24,8 @@ from .resources import DirectionsResource, PricesResource, ReferenceResource
 
 DEFAULT_BASE_URL = "https://api.travelpayouts.com"
 TOKEN_ENV_VAR = "TRAVELPAYOUTS_TOKEN"
+
+T = TypeVar("T")
 
 
 class AviaApiClient:
@@ -59,10 +61,10 @@ class AviaApiClient:
         *,
         base_url: str = DEFAULT_BASE_URL,
         timeout: float | httpx.Timeout = 10.0,
-        rate: Union[Rate, list[Rate], None] = None,
+        rate: Rate | list[Rate] | None = None,
         max_retries: int = 3,
         cache_ttl: float | None = 1800.0,
-        cache_path: Union[str, Path] = "avia_api.db",
+        cache_path: str | Path = "avia_api.db",
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         token = token or os.environ.get(TOKEN_ENV_VAR)
@@ -80,7 +82,7 @@ class AviaApiClient:
         self.directions = DirectionsResource(self)
         self.reference = ReferenceResource(self)
 
-    async def __aenter__(self) -> "AviaApiClient":
+    async def __aenter__(self) -> AviaApiClient:
         return self
 
     async def __aexit__(self, *exc_info: object) -> None:
@@ -89,7 +91,7 @@ class AviaApiClient:
     async def aclose(self) -> None:
         await self._http.aclose()
 
-    async def _get_json(self, path: str, *, params: dict[str, Any], adapter: TypeAdapter[Any]) -> Any:
+    async def _get_json(self, path: str, *, params: dict[str, Any], adapter: TypeAdapter[T]) -> T:
         try:
             response = await self._http.get(path, params=clean_params(params))
         except httpx.TransportError as exc:

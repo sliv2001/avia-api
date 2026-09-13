@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import httpx
-import pytest
 
 from avia_api import AviaApiClient
 from avia_api.models.prices import (

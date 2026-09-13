@@ -6,8 +6,7 @@ from .common import AviaBaseModel, OptionalDateTime
 
 
 class CityDirectionPrice(AviaBaseModel):
-    """An entry from ``/v1/city-directions``.
-    """
+    """An entry from ``/v1/city-directions``."""
 
     origin: str
     destination: str
