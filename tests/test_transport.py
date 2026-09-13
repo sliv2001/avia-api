@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from pathlib import Path
 
@@ -10,6 +11,8 @@ import tenacity
 from pyrate_limiter import Duration, Rate
 
 from avia_api._transport import _RetryableStatusError, _wait, build_transport
+
+LOGGER_NAME = "avia_api._transport"
 
 BASE_URL = "https://example.avia-api.test"
 
@@ -177,3 +180,78 @@ def test_wait_falls_back_to_exponential_backoff_when_no_retry_after() -> None:
 def test_wait_falls_back_to_exponential_backoff_for_non_status_errors() -> None:
     state = _retry_state(httpx.ConnectError("boom"))
     assert _wait(state) >= 0.0
+
+
+# --- logging -------------------------------------------------------------
+
+
+async def test_retry_attempt_logs_warning_with_request_and_status(
+    respx_mock: respx.MockRouter, caplog: pytest.LogCaptureFixture
+) -> None:
+    respx_mock.get("/data").mock(side_effect=[httpx.Response(503), httpx.Response(200, json={"ok": True})])
+    transport = build_transport(rate=None, max_retries=3, cache_ttl=None, cache_path="unused.db")
+
+    with caplog.at_level(logging.WARNING, logger=LOGGER_NAME):
+        async with _client(transport) as client:
+            response = await client.get("/data")
+
+    assert response.status_code == 200
+    assert "GET" in caplog.text
+    assert "/data" in caplog.text
+    assert "HTTP 503" in caplog.text
+    assert "retrying" in caplog.text.lower()
+
+
+async def test_retry_exhausted_on_bad_status_logs_warning(
+    respx_mock: respx.MockRouter, caplog: pytest.LogCaptureFixture
+) -> None:
+    respx_mock.get("/data").mock(return_value=httpx.Response(503))
+    transport = build_transport(rate=None, max_retries=2, cache_ttl=None, cache_path="unused.db")
+
+    with caplog.at_level(logging.WARNING, logger=LOGGER_NAME):
+        async with _client(transport) as client:
+            response = await client.get("/data")
+
+    assert response.status_code == 503
+    assert "exhausted retry budget" in caplog.text
+    assert "giving up with status 503" in caplog.text
+
+
+async def test_retry_exhausted_on_connection_error_logs_warning(
+    respx_mock: respx.MockRouter, caplog: pytest.LogCaptureFixture
+) -> None:
+    respx_mock.get("/data").mock(side_effect=httpx.ConnectError("boom"))
+    transport = build_transport(rate=None, max_retries=2, cache_ttl=None, cache_path="unused.db")
+
+    with caplog.at_level(logging.WARNING, logger=LOGGER_NAME):
+        async with _client(transport) as client:
+            with pytest.raises(httpx.ConnectError):
+                await client.get("/data")
+
+    assert "exhausted retry budget" in caplog.text
+
+
+async def test_rate_limiter_delay_logs_debug(respx_mock: respx.MockRouter, caplog: pytest.LogCaptureFixture) -> None:
+    respx_mock.get("/data").mock(return_value=httpx.Response(200))
+    transport = build_transport(rate=Rate(1, Duration.SECOND), max_retries=1, cache_ttl=None, cache_path="unused.db")
+
+    with caplog.at_level(logging.DEBUG, logger=LOGGER_NAME):
+        async with _client(transport) as client:
+            await client.get("/data")
+            await client.get("/data")
+
+    assert "Rate limiter delayed" in caplog.text
+
+
+async def test_successful_request_logs_debug_status(
+    respx_mock: respx.MockRouter, caplog: pytest.LogCaptureFixture
+) -> None:
+    respx_mock.get("/data").mock(return_value=httpx.Response(200))
+    transport = build_transport(rate=None, max_retries=1, cache_ttl=None, cache_path="unused.db")
+
+    with caplog.at_level(logging.DEBUG, logger=LOGGER_NAME):
+        async with _client(transport) as client:
+            response = await client.get("/data")
+
+    assert response.status_code == 200
+    assert "-> 200" in caplog.text

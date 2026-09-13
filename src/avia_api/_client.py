@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, TypeVar
@@ -21,6 +22,8 @@ from .exceptions import (
     AviaApiValidationError,
 )
 from .resources import DirectionsResource, PricesResource, ReferenceResource
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_BASE_URL = "https://api.travelpayouts.com"
 TOKEN_ENV_VAR = "TRAVELPAYOUTS_TOKEN"
@@ -92,30 +95,43 @@ class AviaApiClient:
         await self._http.aclose()
 
     async def _get_json(self, path: str, *, params: dict[str, Any], adapter: TypeAdapter[T]) -> T:
+        cleaned_params = clean_params(params)
+        logger.debug("GET %s params=%r", path, cleaned_params)
         try:
-            response = await self._http.get(path, params=clean_params(params))
+            response = await self._http.get(path, params=cleaned_params)
         except httpx.TransportError as exc:
+            logger.error("GET %s failed: %s", path, exc)
             raise AviaApiConnectionError(str(exc)) from exc
 
         self._raise_for_status(response)
 
         payload = response.json()
         if isinstance(payload, dict) and payload.get("success") is False:
+            logger.warning("GET %s returned success=false: %s", path, payload.get("error"))
             raise AviaApiResponseError(payload.get("error") or "Aviasales API returned an error", payload=payload)
 
         try:
-            return adapter.validate_python(payload)
+            result = adapter.validate_python(payload)
         except ValidationError as exc:
+            logger.error("GET %s response failed schema validation: %s", path, exc)
             raise AviaApiValidationError(str(exc)) from exc
+
+        logger.debug("GET %s -> %d", path, response.status_code)
+        return result
 
     @staticmethod
     def _raise_for_status(response: httpx.Response) -> None:
         if response.status_code < 400:
             return
         if response.status_code in (401, 403):
+            logger.warning("%s -> %d (authentication error)", response.request.url, response.status_code)
             raise AviaApiAuthenticationError(response)
         if response.status_code == 429:
-            raise AviaApiRateLimitError(response, retry_after=parse_retry_after(response.headers.get("retry-after")))
+            retry_after = parse_retry_after(response.headers.get("retry-after"))
+            logger.warning("%s -> 429 (rate limited); retry_after=%s", response.request.url, retry_after)
+            raise AviaApiRateLimitError(response, retry_after=retry_after)
         if response.status_code >= 500:
+            logger.error("%s -> %d (server error)", response.request.url, response.status_code)
             raise AviaApiServerError(response)
+        logger.warning("%s -> %d", response.request.url, response.status_code)
         raise AviaApiHTTPStatusError(response)

@@ -110,3 +110,24 @@ client = AviaApiClient(
 | `AviaApiHTTPStatusError`     | Прочие HTTP-ошибки                                        |
 | `AviaApiResponseError`       | HTTP 200, но `{"success": false}` в теле; есть `.payload` |
 | `AviaApiValidationError`     | Ответ не соответствует ожидаемой схеме (API изменился)    |
+
+## Логирование
+
+Библиотека использует стандартный `logging`. Чтобы увидеть логи, включите нужный уровень для логгера `avia_api`:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logging.getLogger("avia_api").setLevel(logging.DEBUG)
+```
+
+Что и на каком уровне логируется:
+
+| Логгер                | Уровень   | Событие                                                              |
+| --------------------- | --------- | -------------------------------------------------------------------- |
+| `avia_api._transport` | `DEBUG`   | Задержка на rate limiter'е; успешный запрос и его статус             |
+| `avia_api._transport` | `WARNING` | Повтор после транзиентной ошибки/статуса; исчерпан бюджет retry      |
+| `avia_api._client`    | `DEBUG`   | Исходящий запрос (path + query-параметры) и статус ответа            |
+| `avia_api._client`    | `WARNING` | HTTP 401/403/429/4xx; `{"success": false}` в теле ответа             |
+| `avia_api._client`    | `ERROR`   | HTTP 5xx; сетевая ошибка после retry; ответ не прошёл pydantic-схему |
