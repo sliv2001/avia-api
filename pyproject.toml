@@ -33,6 +33,7 @@ dependencies = [
 Homepage = "https://github.com/sliv2001/avia-api"
 Repository = "https://github.com/sliv2001/avia-api"
 Issues = "https://github.com/sliv2001/avia-api/issues"
+Changelog = "https://github.com/sliv2001/avia-api/blob/master/CHANGELOG.md"
 
 [tool.poetry]
 packages = [{include = "avia_api", from = "src"}]
