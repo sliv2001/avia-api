@@ -1,0 +1,119 @@
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from typing import Any, Union
+
+import httpx
+from pydantic import TypeAdapter, ValidationError
+from pyrate_limiter import Rate
+
+from ._params import clean_params
+from ._transport import build_transport
+from ._utils import parse_retry_after
+from .exceptions import (
+    AviaApiAuthenticationError,
+    AviaApiConnectionError,
+    AviaApiHTTPStatusError,
+    AviaApiRateLimitError,
+    AviaApiResponseError,
+    AviaApiServerError,
+    AviaApiValidationError,
+)
+from .resources import DirectionsResource, PricesResource, ReferenceResource
+
+DEFAULT_BASE_URL = "https://api.travelpayouts.com"
+TOKEN_ENV_VAR = "TRAVELPAYOUTS_TOKEN"
+
+
+class AviaApiClient:
+    """Async client for the Travelpayouts / Aviasales Data API.
+
+    Example:
+        async with AviaApiClient(token="...") as client:
+            prices = await client.prices.cheap(origin="MOW", destination="LED")
+
+    Args:
+        token: API token from the partner's Travelpayouts account. Falls
+            back to the ``TRAVELPAYOUTS_TOKEN`` environment variable. Most
+            endpoints work without one at a reduced quota, but reads always
+            attach it when available.
+        base_url: Overridable mainly for testing.
+        timeout: Passed straight to ``httpx``.
+        rate: A ``pyrate_limiter.Rate`` (or list of rates) capping outbound
+            request throughput. Defaults to 5 requests/second.
+        max_retries: Attempts for requests that fail with a connection error
+            or a 429/5xx status, with exponential backoff (honoring
+            ``Retry-After`` when present).
+        cache_ttl: How long a successful GET response is reused for, in
+            seconds. ``None`` disables the cache.
+        cache_path: SQLite file backing the cache (relative paths land under
+            ``.cache/hishel/``, matching hishel's own convention).
+        transport: Escape hatch for tests or advanced setups - supplying this
+            bypasses rate limiting/retries/caching entirely.
+    """
+
+    def __init__(
+        self,
+        token: str | None = None,
+        *,
+        base_url: str = DEFAULT_BASE_URL,
+        timeout: float | httpx.Timeout = 10.0,
+        rate: Union[Rate, list[Rate], None] = None,
+        max_retries: int = 3,
+        cache_ttl: float | None = 1800.0,
+        cache_path: Union[str, Path] = "avia_api.db",
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        token = token or os.environ.get(TOKEN_ENV_VAR)
+        headers = {"X-Access-Token": token} if token else {}
+        if transport is None:
+            transport = build_transport(
+                rate=rate,
+                max_retries=max_retries,
+                cache_ttl=cache_ttl,
+                cache_path=cache_path,
+            )
+        self._http = httpx.AsyncClient(base_url=base_url, headers=headers, timeout=timeout, transport=transport)
+
+        self.prices = PricesResource(self)
+        self.directions = DirectionsResource(self)
+        self.reference = ReferenceResource(self)
+
+    async def __aenter__(self) -> "AviaApiClient":
+        return self
+
+    async def __aexit__(self, *exc_info: object) -> None:
+        await self.aclose()
+
+    async def aclose(self) -> None:
+        await self._http.aclose()
+
+    async def _get_json(self, path: str, *, params: dict[str, Any], adapter: TypeAdapter[Any]) -> Any:
+        try:
+            response = await self._http.get(path, params=clean_params(params))
+        except httpx.TransportError as exc:
+            raise AviaApiConnectionError(str(exc)) from exc
+
+        self._raise_for_status(response)
+
+        payload = response.json()
+        if isinstance(payload, dict) and payload.get("success") is False:
+            raise AviaApiResponseError(payload.get("error") or "Aviasales API returned an error", payload=payload)
+
+        try:
+            return adapter.validate_python(payload)
+        except ValidationError as exc:
+            raise AviaApiValidationError(str(exc)) from exc
+
+    @staticmethod
+    def _raise_for_status(response: httpx.Response) -> None:
+        if response.status_code < 400:
+            return
+        if response.status_code in (401, 403):
+            raise AviaApiAuthenticationError(response)
+        if response.status_code == 429:
+            raise AviaApiRateLimitError(response, retry_after=parse_retry_after(response.headers.get("retry-after")))
+        if response.status_code >= 500:
+            raise AviaApiServerError(response)
+        raise AviaApiHTTPStatusError(response)
