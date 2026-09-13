@@ -26,7 +26,9 @@ dev = [
     "pytest (>=9.1.1,<10.0.0)",
     "pytest-asyncio (>=1.4.0,<2.0.0)",
     "respx (>=0.23.1,<0.24.0)",
-    "pytest-cov (>=7.1.0,<8.0.0)"
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "ruff (>=0.14.0,<0.15.0)",
+    "mypy (>=1.19.0,<2.0.0)"
 ]
 
 [tool.pytest.ini_options]
@@ -41,3 +43,26 @@ fail_under = 99
 exclude_also = [
     "if t\\.TYPE_CHECKING:",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src/avia_api"]
+
+[[tool.mypy.overrides]]
+module = "hishel.*"
+ignore_missing_imports = true
