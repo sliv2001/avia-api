@@ -68,6 +68,8 @@ This provides cross-checking.
 - [ ] README.md describes the changed logic
 - [ ] CLAUDE.md describes the changed logic. SKILL.md files are updated if needed.
 - [ ] CHANGELOG.md describes the changes.
+- [ ] Logging is sufficient.
+- [ ] Exception handling is sufficient.
 - [ ] All tests pass locally.
 - [ ] ruff passes locally.
 - [ ] mypy passes locally.
