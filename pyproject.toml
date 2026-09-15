@@ -8,6 +8,17 @@ authors = [
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.11"
+keywords = [
+    "travelpayouts",
+    "aviasales",
+    "flights",
+    "airline-tickets",
+    "prices",
+    "api-client",
+    "async",
+    "httpx",
+    "pydantic",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
