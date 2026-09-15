@@ -26,13 +26,16 @@ Initial release.
 - Structured logging (`avia_api._client`, `avia_api._transport`) of the
   request lifecycle, retries, and rate limiting - without leaking the token
   into the logs.
-- CI on GitHub Actions: tests on Python 3.11-3.13 with a 99% coverage
+- CI on GitHub Actions: tests on Python 3.11-3.14 with a 99% coverage
   threshold, the `ruff` linter/formatter, and strict `mypy` type checking.
 - Package metadata for publishing: MIT license, `py.typed` marker,
-  classifiers, repository links.
+  classifiers, keywords, repository links.
 - `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue/PR templates.
 - CI/coverage/Python/license badges in the README.
-- `dependabot.yml` for automated dependency and GitHub Actions updates.
+- `dependabot.yml` for automated dependency and GitHub Actions updates,
+  targeting `dev`.
+- Automated PyPI publishing (`publish.yml`) via PyPI Trusted Publishing
+  (OIDC), triggered by GitHub Releases.
 
 [Unreleased]: https://github.com/sliv2001/avia-api/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/sliv2001/avia-api/releases/tag/v0.1.0
