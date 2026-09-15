@@ -6,19 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
-### Added
-
-- `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue/PR templates.
-- CI/coverage/Python/license badges in the README.
-- `dependabot.yml` for automated dependency and GitHub Actions updates.
-- Python 3.14 support: added to the CI matrix and package classifiers
-  (verified locally - full test suite, 100% coverage, and mypy all pass).
-
-### Changed
-
-- Package classifier bumped from `Alpha` to `Beta`.
-
-## [0.1.0] - 2026-09-13
+## [0.1.0] - 2026-09-15
 
 Initial release.
 
@@ -42,6 +30,9 @@ Initial release.
   threshold, the `ruff` linter/formatter, and strict `mypy` type checking.
 - Package metadata for publishing: MIT license, `py.typed` marker,
   classifiers, repository links.
+- `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue/PR templates.
+- CI/coverage/Python/license badges in the README.
+- `dependabot.yml` for automated dependency and GitHub Actions updates.
 
 [Unreleased]: https://github.com/sliv2001/avia-api/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/sliv2001/avia-api/releases/tag/v0.1.0
