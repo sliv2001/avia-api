@@ -1,45 +1,44 @@
 # Changelog
 
-Все заметные изменения в этом проекте документируются в этом файле.
+All notable changes to this project are documented in this file.
 
-Формат соответствует [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), версионирование - [Semantic Versioning](https://semver.org/lang/ru/).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
 ### Added
 
-- `CONTRIBUTING.md`, `SECURITY.md`, шаблоны issue/PR для GitHub.
-- Бейджи CI/coverage/Python/license в README.
+- `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue/PR templates.
+- CI/coverage/Python/license badges in the README.
 
 ### Changed
 
-- Classifier пакета поднят с `Alpha` до `Beta`.
+- Package classifier bumped from `Alpha` to `Beta`.
 
 ## [0.1.0] - 2026-09-13
 
-Первый релиз.
+Initial release.
 
 ### Added
 
-- Асинхронный клиент `AviaApiClient` для Data API Travelpayouts / Aviasales:
-  ресурсы `prices` (цены), `directions` (популярные направления) и
-  `reference` (справочные данные - страны, города, аэропорты, авиакомпании,
-  маршруты).
-- Слоистый transport: клиентский rate limiting (`pyrate-limiter`), повторы с
-  экспоненциальным backoff и джиттером (`tenacity`), учитывающие заголовок
-  `Retry-After` с потолком в 60 секунд на одну попытку, и опциональный кэш
-  ответов (`hishel`) поверх sqlite.
-- Валидация ответов через pydantic-модели (`frozen=True`, `extra="allow"`) и
-  типизированная иерархия исключений (`AviaApiError` и подклассы) для
-  сетевых ошибок, HTTP-статусов, бизнес-ошибок API (`success: false`) и
-  расхождения схемы ответа.
-- Структурированное логирование (`avia_api._client`, `avia_api._transport`)
-  жизненного цикла запроса, повторов и rate limiting - без утечки токена в
-  логи.
-- CI на GitHub Actions: тесты на Python 3.11-3.13 с порогом покрытия 99%,
-  линтер и форматтер `ruff`, строгая проверка типов `mypy`.
-- Пакетные метаданные для публикации: лицензия MIT, маркер `py.typed`,
-  classifiers, ссылки на репозиторий.
+- Async client `AviaApiClient` for the Travelpayouts / Aviasales Data API:
+  `prices`, `directions` (popular routes), and `reference` (reference data -
+  countries, cities, airports, airlines, routes) resources.
+- Layered transport: client-side rate limiting (`pyrate-limiter`), retries with
+  exponential backoff and jitter (`tenacity`) that honor the `Retry-After`
+  header capped at 60 seconds per attempt, and an optional response cache
+  (`hishel`) on top of sqlite.
+- Response validation via pydantic models (`frozen=True`, `extra="allow"`) and
+  a typed exception hierarchy (`AviaApiError` and subclasses) for network
+  errors, HTTP statuses, API business errors (`success: false`), and response
+  schema drift.
+- Structured logging (`avia_api._client`, `avia_api._transport`) of the
+  request lifecycle, retries, and rate limiting - without leaking the token
+  into the logs.
+- CI on GitHub Actions: tests on Python 3.11-3.13 with a 99% coverage
+  threshold, the `ruff` linter/formatter, and strict `mypy` type checking.
+- Package metadata for publishing: MIT license, `py.typed` marker,
+  classifiers, repository links.
 
 [Unreleased]: https://github.com/sliv2001/avia-api/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/sliv2001/avia-api/releases/tag/v0.1.0

@@ -1,18 +1,18 @@
 ---
 name: Bug report
-about: Сообщить о некорректном поведении библиотеки
+about: Report incorrect library behavior
 title: ""
 labels: bug
 assignees: ""
 ---
 
-## Описание проблемы
+## Problem description
 
-Что происходит и что ожидалось вместо этого.
+What happens and what was expected instead.
 
-## Как воспроизвести
+## How to reproduce
 
-Минимальный пример кода (по возможности - без реального токена):
+Minimal code example (without a real token, if possible):
 
 ```python
 import asyncio
@@ -25,18 +25,18 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-## Окружение
+## Environment
 
-- `avia-api`: <!-- версия пакета -->
+- `avia-api`: <!-- package version -->
 - Python: <!-- python --version -->
-- ОС:
+- OS:
 
-## Логи / traceback
+## Logs / traceback
 
-<!-- Если уместно, включите логи с DEBUG-уровнем логгера avia_api
-     (см. раздел "Логирование" в README) - но проверьте, что в них
-     нет токена или других секретов перед публикацией. -->
+<!-- If relevant, include logs with the avia_api logger's DEBUG level
+     (see the "Logging" section in the README) - but check that they
+     contain no token or other secrets before posting. -->
 
 ```
-вставьте сюда
+paste here
 ```

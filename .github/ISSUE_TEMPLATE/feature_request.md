@@ -1,21 +1,21 @@
 ---
 name: Feature request
-about: Предложить новую возможность или эндпоинт
+about: Suggest a new capability or endpoint
 title: ""
 labels: enhancement
 assignees: ""
 ---
 
-## Проблема
+## Problem
 
-Какую задачу сейчас нельзя решить с текущим API библиотеки?
+What task can't currently be solved with the library's existing API?
 
-## Предлагаемое решение
+## Proposed solution
 
-Как могла бы выглядеть новая возможность (сигнатура метода, поведение,
-ссылка на документацию эндпоинта Travelpayouts, если добавляется новый
-ресурс/метод).
+What the new capability could look like (method signature, behavior,
+link to the Travelpayouts endpoint documentation if a new
+resource/method is being added).
 
-## Альтернативы
+## Alternatives
 
-Какие обходные пути вы уже пробовали или рассматривали.
+What workarounds you've already tried or considered.

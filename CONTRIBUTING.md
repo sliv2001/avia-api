@@ -1,78 +1,78 @@
 # Contributing
 
-Спасибо за интерес к `avia-api`! Ниже - как настроить окружение и что
-проверяется перед мержем.
+Thanks for your interest in `avia-api`! Below is how to set up the
+environment and what's checked before merging.
 
-## Окружение
+## Environment
 
-Нужен Python 3.11+ и [Poetry](https://python-poetry.org/).
+You need Python 3.11+ and [Poetry](https://python-poetry.org/).
 
 ```bash
 poetry install
 ```
 
-Виртуальное окружение создаётся в `.venv/` внутри репозитория (см. `poetry.toml`).
+The virtual environment is created in `.venv/` inside the repository (see `poetry.toml`).
 
-## Перед отправкой PR
+## Before submitting a PR
 
 ```bash
-poetry run ruff check .           # линтер
-poetry run ruff format --check .  # форматирование
-poetry run mypy                   # строгая проверка типов
+poetry run ruff check .           # linter
+poetry run ruff format --check .  # formatting
+poetry run mypy                   # strict type checking
 poetry run pytest -q --cov=avia_api --cov-report=term-missing --cov-fail-under=99
 ```
 
-Все четыре команды должны проходить без ошибок - это ровно то, что запускает CI (`.github/workflows/ci.yml`).
+All four commands must pass without errors - this is exactly what CI runs (`.github/workflows/ci.yml`).
 
-Чтобы автоматически поправить форматирование:
+To automatically fix formatting:
 
 ```bash
 poetry run ruff format .
 ```
 
-## Тесты
+## Tests
 
-- Покрытие не должно опускаться ниже 99% (единственное принятое исключение - блок `if TYPE_CHECKING:` в `resources/_base.py`). Если PR снижает покрытие - добавьте недостающий тест, а не понижайте порог.
-- Один тестовый файл на один модуль исходников (`tests/test_<module>.py`).
-- Для логики ресурсов/клиента (параметры запроса, разбор ответа, маппинг ошибок) используйте фикстуру `client_factory` (`tests/conftest.py`) - она собирает клиент с `httpx.MockTransport` и не трогает реальный transport-стек.
-- Для поведения самого transport-слоя (кэш/retry/rate-limit в `_transport.py`) используйте `respx` (фикстура `respx_mock`) - он подменяет `httpx.AsyncHTTPTransport` глобально, поэтому кэш, retry и rate limiting реально отрабатывают.
-- Тайминг-зависимые проверки (rate limiting) должны проверять только нижнюю границу с запасом, никогда не проверяйте точную/верхнюю границу.
+- Coverage must not drop below 99% (the only accepted exception is the `if TYPE_CHECKING:` block in `resources/_base.py`). If a PR drops coverage - add the missing test rather than lowering the threshold.
+- One test file per source module (`tests/test_<module>.py`).
+- For resource/client logic (request parameters, response parsing, error mapping) use the `client_factory` fixture (`tests/conftest.py`) - it builds a client with `httpx.MockTransport` and doesn't touch the real transport stack.
+- For the transport layer's own behavior (cache/retry/rate-limit in `_transport.py`) use `respx` (the `respx_mock` fixture) - it patches `httpx.AsyncHTTPTransport` globally, so cache, retry, and rate limiting actually run.
+- Timing-sensitive checks (rate limiting) should only check a lower bound with margin - never assert an exact/upper bound.
 
-Подробные конвенции - в `.claude/skills/add-tests/SKILL.md`.
+Detailed conventions - in `.claude/skills/add-tests/SKILL.md`.
 
-Rule of Thumb: пишите код сами, а тестирование отдавайте на откуп Claude или ChatGPT.
-Это обеспечит перекрёстную проверку.
+Rule of Thumb: write the code yourself, and delegate testing to Claude or ChatGPT.
+This provides cross-checking.
 
-## Стиль кода
+## Code style
 
-- Форматирование и импорт-сортировка - через `ruff format`/`ruff` (isort включён в `select`), руками не выравнивайте.
-- Публичный API типизирован полностью; `mypy --strict` должен проходить без `# type: ignore` там, где можно обойтись без него.
-- Не добавляйте абстракции/флаги на будущее без конкретной текущей необходимости - см. существующий код как ориентир по объёму абстракции.
+- Formatting and import sorting - via `ruff format`/`ruff` (isort is enabled in `select`), don't align by hand.
+- The public API is fully typed; `mypy --strict` must pass without `# type: ignore` wherever it can be avoided.
+- Don't add abstractions/flags for the future without a concrete current need - use the existing code as a guide for the right amount of abstraction.
 
-## Коммиты и PR
+## Commits and PRs
 
-- Один PR - одна логическая задача (фича, фикс, рефактор).
-- В описании PR укажите, что изменилось и почему, а не только что.
-- Если меняется публичное поведение - добавьте запись в `CHANGELOG.md` под `[Unreleased]`.
+- One PR - one logical task (feature, fix, refactor).
+- In the PR description, state what changed and why, not just what.
+- If public behavior changes - add an entry to `CHANGELOG.md` under `[Unreleased]`.
 
 ### Pre-commit checklist
 
-- [ ] Коммит делается на свою ветку. Коммиты в `master` и `dev` запрещены.
-- [ ] README.md содержит описание изменененной логики
-- [ ] CLAUDE.md содержит описание изменененной логики. SKILL.md содержат, если необходимо.
-- [ ] CHANGELOG.md содержит описание изменений.
+- [ ] Commits are made on your own branch. Commits to `master` and `dev` are forbidden.
+- [ ] README.md describes the changed logic
+- [ ] CLAUDE.md describes the changed logic. SKILL.md files are updated if needed.
+- [ ] CHANGELOG.md describes the changes.
 
 ### Pre-PR checklist
 
-- [ ] PR направлен из своей ветки в `dev` или из `dev` в `master`. Другие PR запрещены.
-- [ ] README.md содержит описание изменененной логики
-- [ ] CLAUDE.md содержит описание изменененной логики. SKILL.md содержат, если необходимо.
-- [ ] CHANGELOG.md содержит описание изменений.
-- [ ] Все тесты пройдены локально.
-- [ ] ruff пройден локально.
-- [ ] mypy пройден локально.
-- [ ] CI пройден.
+- [ ] The PR goes from your own branch into `dev`, or from `dev` into `master`. Other PRs are forbidden.
+- [ ] README.md describes the changed logic
+- [ ] CLAUDE.md describes the changed logic. SKILL.md files are updated if needed.
+- [ ] CHANGELOG.md describes the changes.
+- [ ] All tests pass locally.
+- [ ] ruff passes locally.
+- [ ] mypy passes locally.
+- [ ] CI passes.
 
-## Сообщить об уязвимости
+## Reporting a vulnerability
 
-Не создавайте публичный issue - см. [SECURITY.md](SECURITY.md).
+Don't open a public issue - see [SECURITY.md](SECURITY.md).

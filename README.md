@@ -5,32 +5,32 @@
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/sliv2001/avia-api)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-Асинхронный Python-клиент для [Data API Aviasales / Travelpayouts](https://support.travelpayouts.com/hc/ru/sections/201008338-Aviasales-flight-data-API) - исторических/кэшированных цен на авиабилеты, календарей цен и справочных данных (страны, города, аэропорты, авиакомпании, маршруты).
+Async Python client for the [Aviasales / Travelpayouts Data API](https://support.travelpayouts.com/hc/ru/sections/201008338-Aviasales-flight-data-API) - historical/cached ticket prices, price calendars, and reference data (countries, cities, airports, airlines, routes).
 
-Не покрывает: real-time поиск (`Aviasales Flights Search API`) и GraphQL API - это отдельные продукты с иной моделью взаимодействия.
+Not covered: real-time search (`Aviasales Flights Search API`) and the GraphQL API - these are separate products with a different interaction model.
 
-## Установка
+## Installation
 
-Пакет доступен через любой стандартный менеджер пакетов:
+The package is available through any standard package manager:
 
 ```bash
 pip install avia-api
-# или
+# or
 uv add avia-api
-# или
+# or
 poetry add avia-api
 ```
 
-Требуется Python 3.11+.
+Requires Python 3.11+.
 
-## Быстрый старт
+## Quick start
 
 ```python
 import asyncio
 from avia_api import AviaApiClient
 
 async def main() -> None:
-    async with AviaApiClient(token="ВАШ_ТОКЕН") as client:
+    async with AviaApiClient(token="YOUR_TOKEN") as client:
         prices = await client.prices.cheap(origin="MOW", destination="LED")
         for destination, by_index in prices.items():
             for entry in by_index.values():
@@ -39,37 +39,37 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-Токен также можно не передавать явно, а положить в переменную окружения `TRAVELPAYOUTS_TOKEN` - клиент подхватит её автоматически. Токен получают в личном кабинете: https://www.travelpayouts.com/programs/100/tools/api
+You can also skip passing the token explicitly and put it in the `TRAVELPAYOUTS_TOKEN` environment variable - the client will pick it up automatically. Get a token in your personal dashboard: https://www.travelpayouts.com/programs/100/tools/api
 
-## Ресурсы и эндпоинты
+## Resources and endpoints
 
-Все методы возвращают модели, провалидированные [pydantic](https://docs.pydantic.dev/)
+All methods return models validated by [pydantic](https://docs.pydantic.dev/)
 
-### `client.prices` - цены
+### `client.prices` - prices
 
-| Метод                                             | Эндпоинт                               | Описание                                     |
-| ------------------------------------------------- | -------------------------------------- | -------------------------------------------- |
-| `cheap(origin, destination, ...)`                 | `GET /v1/prices/cheap`                 | Самые дешёвые билеты по направлению          |
-| `direct(origin, destination, ...)`                | `GET /v1/prices/direct`                | То же, только прямые рейсы                   |
-| `calendar(origin, destination, depart_date, ...)` | `GET /v1/prices/calendar`              | Календарь цен на каждый день месяца          |
-| `monthly(origin, destination, ...)`               | `GET /v1/prices/monthly`               | Самая низкая цена по месяцам                 |
-| `latest(...)`                                     | `GET /v2/prices/latest`                | Последние найденные цены по всей базе поиска |
-| `month_matrix(origin, destination, ...)`          | `GET /v2/prices/month-matrix`          | Календарь цен за месяц (v2)                  |
-| `week_matrix(origin, destination, ...)`           | `GET /v2/prices/week-matrix`           | Календарь цен за неделю                      |
-| `nearest_places_matrix(origin, destination, ...)` | `GET /v2/prices/nearest-places-matrix` | Цены по соседним аэропортам/городам          |
+| Method                                            | Endpoint                               | Description                                      |
+| ------------------------------------------------- | -------------------------------------- | ------------------------------------------------ |
+| `cheap(origin, destination, ...)`                 | `GET /v1/prices/cheap`                 | Cheapest tickets for a route                     |
+| `direct(origin, destination, ...)`                | `GET /v1/prices/direct`                | Same, but direct flights only                    |
+| `calendar(origin, destination, depart_date, ...)` | `GET /v1/prices/calendar`              | Price calendar for every day of the month        |
+| `monthly(origin, destination, ...)`               | `GET /v1/prices/monthly`               | Lowest price by month                            |
+| `latest(...)`                                     | `GET /v2/prices/latest`                | Latest found prices across the whole search base |
+| `month_matrix(origin, destination, ...)`          | `GET /v2/prices/month-matrix`          | Price calendar for a month (v2)                  |
+| `week_matrix(origin, destination, ...)`           | `GET /v2/prices/week-matrix`           | Price calendar for a week                        |
+| `nearest_places_matrix(origin, destination, ...)` | `GET /v2/prices/nearest-places-matrix` | Prices for nearby airports/cities                |
 
-### `client.directions` - популярные направления
+### `client.directions` - popular routes
 
-| Метод                        | Эндпоинт                     | Описание                         |
+| Method                       | Endpoint                     | Description                      |
 | ---------------------------- | ---------------------------- | -------------------------------- |
-| `airline(airline_code, ...)` | `GET /v1/airline-directions` | Популярные маршруты авиакомпании |
-| `city(origin, ...)`          | `GET /v1/city-directions`    | Популярные направления из города |
+| `airline(airline_code, ...)` | `GET /v1/airline-directions` | Popular routes for an airline    |
+| `city(origin, ...)`          | `GET /v1/city-directions`    | Popular destinations from a city |
 
-### `client.reference` - справочные данные
+### `client.reference` - reference data
 
-Публичные, редко меняющиеся JSON-файлы:
+Public, rarely changing JSON files:
 
-| Метод                              | Эндпоинт                                       |
+| Method                             | Endpoint                                       |
 | ---------------------------------- | ---------------------------------------------- |
 | `countries(language="en")`         | `GET /data/{language}/countries.json`          |
 | `cities(language="en")`            | `GET /data/{language}/cities.json`             |
@@ -79,7 +79,7 @@ asyncio.run(main())
 | `planes()`                         | `GET /data/planes.json`                        |
 | `routes()`                         | `GET /data/routes.json`                        |
 
-## Конфигурация клиента
+## Client configuration
 
 ```python
 from avia_api import AviaApiClient
@@ -87,38 +87,38 @@ from pyrate_limiter import Rate, Duration
 
 client = AviaApiClient(
     token="...",
-    rate=Rate(5, Duration.SECOND),   # ограничение исходящих запросов (pyrate-limiter)
-    max_retries=3,                   # повторы при 429/5xx и обрывах соединения
-    cache_ttl=1800,                  # секунд; None - отключить кэш ответов
-    cache_path="avia_api.db",        # sqlite-файл кэша (hishel), относительный путь
-                                      # уходит под .cache/hishel/
+    rate=Rate(5, Duration.SECOND),   # outgoing request rate limit (pyrate-limiter)
+    max_retries=3,                   # retries on 429/5xx and connection drops
+    cache_ttl=1800,                  # seconds; None disables the response cache
+    cache_path="avia_api.db",        # sqlite cache file (hishel), relative path
+                                      # goes under .cache/hishel/
     timeout=10.0,
 )
 ```
 
-- **Rate limiting** - [pyrate-limiter](https://github.com/vutran1710/PyrateLimiter), единый bucket на клиент. Ограничивает скорость исходящих запросов ещё до отправки, чтобы не словить `429` от API.
-- **Retries** - [tenacity](https://github.com/jd/tenacity) с экспоненциальным backoff и джиттером; при `429` учитывается заголовок `Retry-After`, если он присутствует, но не более 60 секунд за одну попытку - явно большое значение от сервера (например, во время инцидента на его стороне) не может подвесить запрос на произвольное время.
-- **Кэш** - [hishel](https://hishel.com) поверх sqlite. Ответы Travelpayouts не присылают `Cache-Control`, поэтому используется `FilterPolicy` (кэшируется любой успешный `GET`, а срок жизни записи определяется `cache_ttl`), а не RFC 9111.
+- **Rate limiting** - [pyrate-limiter](https://github.com/vutran1710/PyrateLimiter), a single bucket per client. Limits the rate of outgoing requests before they're sent, to avoid getting a `429` from the API.
+- **Retries** - [tenacity](https://github.com/jd/tenacity) with exponential backoff and jitter; on `429` the `Retry-After` header is honored if present, but capped at 60 seconds per attempt - an unusually large value from the server (e.g. during an incident on its side) can't stall a request indefinitely.
+- **Cache** - [hishel](https://hishel.com) on top of sqlite. Travelpayouts responses don't send `Cache-Control`, so `FilterPolicy` is used (any successful `GET` is cached, with entry lifetime governed by `cache_ttl`) instead of RFC 9111.
 
-Для тестов или нестандартных сценариев можно передать `transport=...` - собственный `httpx.AsyncBaseTransport`, тогда rate limiting/retry/кэш полностью отключаются, и запросы идут напрямую через него (см. `respx` или `httpx.MockTransport`).
+For tests or non-standard scenarios you can pass `transport=...` - your own `httpx.AsyncBaseTransport`, which fully disables rate limiting/retry/cache, and requests go straight through it (see `respx` or `httpx.MockTransport`).
 
-## Обработка ошибок
+## Error handling
 
-Все исключения наследуются от `avia_api.AviaApiError`:
+All exceptions derive from `avia_api.AviaApiError`:
 
-| Исключение                   | Когда возникает                                           |
-| ---------------------------- | --------------------------------------------------------- |
-| `AviaApiConnectionError`     | Сеть недоступна / таймаут - после исчерпания retry        |
-| `AviaApiAuthenticationError` | HTTP 401/403 - токен отсутствует или невалиден            |
-| `AviaApiRateLimitError`      | HTTP 429 - после исчерпания retry; есть `.retry_after`    |
-| `AviaApiServerError`         | HTTP 5xx - после исчерпания retry                         |
-| `AviaApiHTTPStatusError`     | Прочие HTTP-ошибки                                        |
-| `AviaApiResponseError`       | HTTP 200, но `{"success": false}` в теле; есть `.payload` |
-| `AviaApiValidationError`     | Ответ не соответствует ожидаемой схеме (API изменился)    |
+| Exception                    | When it occurs                                                 |
+| ---------------------------- | -------------------------------------------------------------- |
+| `AviaApiConnectionError`     | Network unavailable / timeout - after retries are exhausted    |
+| `AviaApiAuthenticationError` | HTTP 401/403 - token missing or invalid                        |
+| `AviaApiRateLimitError`      | HTTP 429 - after retries are exhausted; has `.retry_after`     |
+| `AviaApiServerError`         | HTTP 5xx - after retries are exhausted                         |
+| `AviaApiHTTPStatusError`     | Other HTTP errors                                              |
+| `AviaApiResponseError`       | HTTP 200, but `{"success": false}` in the body; has `.payload` |
+| `AviaApiValidationError`     | Response doesn't match the expected schema (API changed)       |
 
-## Логирование
+## Logging
 
-Библиотека использует стандартный `logging`. Чтобы увидеть логи, включите нужный уровень для логгера `avia_api`:
+The library uses standard `logging`. To see logs, enable the desired level for the `avia_api` logger:
 
 ```python
 import logging
@@ -127,12 +127,12 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("avia_api").setLevel(logging.DEBUG)
 ```
 
-Что и на каком уровне логируется:
+What is logged and at what level:
 
-| Логгер                | Уровень   | Событие                                                              |
-| --------------------- | --------- | -------------------------------------------------------------------- |
-| `avia_api._transport` | `DEBUG`   | Задержка на rate limiter'е; успешный запрос и его статус             |
-| `avia_api._transport` | `WARNING` | Повтор после транзиентной ошибки/статуса; исчерпан бюджет retry      |
-| `avia_api._client`    | `DEBUG`   | Исходящий запрос (path + query-параметры) и статус ответа            |
-| `avia_api._client`    | `WARNING` | HTTP 401/403/429/4xx; `{"success": false}` в теле ответа             |
-| `avia_api._client`    | `ERROR`   | HTTP 5xx; сетевая ошибка после retry; ответ не прошёл pydantic-схему |
+| Logger                | Level     | Event                                                                      |
+| --------------------- | --------- | -------------------------------------------------------------------------- |
+| `avia_api._transport` | `DEBUG`   | Delay in the rate limiter; successful request and its status               |
+| `avia_api._transport` | `WARNING` | Retry after a transient error/status; retry budget exhausted               |
+| `avia_api._client`    | `DEBUG`   | Outgoing request (path + query parameters) and response status             |
+| `avia_api._client`    | `WARNING` | HTTP 401/403/429/4xx; `{"success": false}` in the response body            |
+| `avia_api._client`    | `ERROR`   | HTTP 5xx; network error after retries; response failed the pydantic schema |

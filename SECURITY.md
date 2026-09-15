@@ -1,33 +1,33 @@
 # Security Policy
 
-## Поддерживаемые версии
+## Supported versions
 
-Проект пока находится на стадии Beta (`0.x`). Патчи безопасности
-выпускаются только для последней опубликованной версии на PyPI.
+The project is currently in Beta (`0.x`). Security patches
+are only released for the latest published version on PyPI.
 
-| Версия          | Поддерживается     |
-| --------------- | ------------------ |
-| 0.x (последняя) | :white_check_mark: |
-| < последней     | :x:                |
+| Version      | Supported          |
+| ------------ | ------------------ |
+| 0.x (latest) | :white_check_mark: |
+| < latest     | :x:                |
 
-## Как сообщить об уязвимости
+## How to report a vulnerability
 
-Пожалуйста, **не создавайте публичный issue** для уязвимостей, которые
-могут затронуть пользователей (например, утечка токена в логи, SSRF
-через параметры запроса, некорректная валидация ответов API и т.п.).
+Please **do not open a public issue** for vulnerabilities that
+could affect users (e.g. a token leaking into logs, SSRF
+via request parameters, incorrect API response validation, etc.).
 
-Вместо этого воспользуйтесь одним из способов:
+Instead, use one of these channels:
 
-- GitHub [Private vulnerability reporting](https://github.com/sliv2001/avia-api/security/advisories/new) для этого репозитория (предпочтительно);
-- либо напишите напрямую автору: ivan.sladkov@yandex.ru.
+- GitHub [Private vulnerability reporting](https://github.com/sliv2001/avia-api/security/advisories/new) for this repository (preferred);
+- or email the author directly: ivan.sladkov@yandex.ru.
 
-В сообщении укажите:
+In your report, please include:
 
-- версию `avia-api` и Python;
-- шаги для воспроизведения / PoC;
-- потенциальное влияние (что именно может пойти не так).
+- the `avia-api` and Python version;
+- steps to reproduce / a PoC;
+- the potential impact (what exactly could go wrong).
 
-## Что происходит дальше
+## What happens next
 
-- Подтверждение получения - в течение нескольких дней.
-- После подтверждения проблемы будет подготовлен патч и выпущен новый релиз; публичное раскрытие деталей - после выхода фикса.
+- Acknowledgment of receipt - within a few days.
+- Once the issue is confirmed, a patch will be prepared and a new release published; public disclosure of details - after the fix ships.
