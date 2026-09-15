@@ -10,6 +10,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue/PR templates.
 - CI/coverage/Python/license badges in the README.
+- `dependabot.yml` for automated dependency and GitHub Actions updates.
+- Python 3.14 support: added to the CI matrix and package classifiers
+  (verified locally - full test suite, 100% coverage, and mypy all pass).
 
 ### Changed
 
