@@ -1,5 +1,10 @@
 # avia-api
 
+[![CI](https://github.com/sliv2001/avia-api/actions/workflows/ci.yml/badge.svg)](https://github.com/sliv2001/avia-api/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/badge/coverage-99%25%2B-brightgreen)](https://github.com/sliv2001/avia-api/blob/master/pyproject.toml)
+[![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://github.com/sliv2001/avia-api)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Асинхронный Python-клиент для [Data API Aviasales / Travelpayouts](https://support.travelpayouts.com/hc/ru/sections/201008338-Aviasales-flight-data-API) - исторических/кэшированных цен на авиабилеты, календарей цен и справочных данных (страны, города, аэропорты, авиакомпании, маршруты).
 
 Не покрывает: real-time поиск (`Aviasales Flights Search API`) и GraphQL API - это отдельные продукты с иной моделью взаимодействия.

@@ -6,6 +6,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- `CONTRIBUTING.md`, `SECURITY.md`, шаблоны issue/PR для GitHub.
+- Бейджи CI/coverage/Python/license в README.
+
+### Changed
+
+- Classifier пакета поднят с `Alpha` до `Beta`.
+
 ## [0.1.0] - 2026-09-13
 
 Первый релиз.
