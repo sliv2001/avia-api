@@ -73,6 +73,24 @@ This provides cross-checking.
 - [ ] mypy passes locally.
 - [ ] CI passes.
 
+## Releasing
+
+Publishing to PyPI is automated via `.github/workflows/publish.yml` using
+[PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OIDC) -
+no API token is stored anywhere.
+
+1. Bump `version` in `pyproject.toml` and `__version__` in
+   `src/avia_api/__init__.py`.
+2. Move the `[Unreleased]` section in `CHANGELOG.md` under a new
+   `## [X.Y.Z] - YYYY-MM-DD` heading, and update the compare links at the
+   bottom of the file.
+3. Merge that into `master`, then tag it `vX.Y.Z` and push the tag.
+4. Create a GitHub Release from that tag (this is what actually triggers
+   the workflow - a bare tag push does not).
+5. The `build` job re-runs the full test suite and builds the sdist/wheel;
+   the `publish` job then uploads them to PyPI via the `pypi` GitHub
+   Environment.
+
 ## Reporting a vulnerability
 
 Don't open a public issue - see [SECURITY.md](SECURITY.md).
